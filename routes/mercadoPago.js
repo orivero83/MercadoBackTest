@@ -18,20 +18,20 @@ router.post("/preference", async (req, res) => {
         const body = {
             items: [
                 {
-                title: req.body.title,
-                quantity: Number(req.body.quantity),
-                unit_price: Number(req.body.unit_price),
-                currency_id: req.body.currency_id,
-            
-            },
-        ],
+                    title: req.body.title,
+                    quantity: Number(req.body.quantity),
+                    unit_price: Number(req.body.unit_price),
+                    currency_id: req.body.currency_id,
+
+                },
+            ],
 
             back_urls: {
                 success: 'https://www.danirivero.com',
                 failure: 'http://www.danirivero.com',
                 pending: 'http://www.danirivero.com',
-              },
-              auto_return: 'approved',
+            },
+            auto_return: 'approved',
         };
 
         const preference = new Preference(client);
@@ -60,7 +60,7 @@ router.post("/webhook", (req, res) => {
         }
 
         // Manejar las notificaciones del webhook aquí
-        console.log('Notificación de Mercado Pago recibida:', req.body);
+        console.log('Notificación de Mercado Pago recibida:', JSON.stringify(req.body, null, 2));
         res.status(200).send("Notificación recibida");
     } catch (error) {
         console.error('Error al procesar la notificación:', error);
