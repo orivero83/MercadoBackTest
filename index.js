@@ -6,7 +6,8 @@ import mercadoPago from './routes/mercadoPago.js';
 const app = express();
 const port = 3000;
 
-app.use(cors());
+app.use(cors({ origin: 'https://mercadofront.onrender.com' })); // Actualiza la URL del frontend
+
 
 app.use(express.json());
 
