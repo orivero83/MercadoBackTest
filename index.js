@@ -22,7 +22,6 @@ app.use(
 
 
 
-
 // API
 app.get("/", (req, res) => {
     res.send("Sou eu!");

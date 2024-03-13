@@ -34,8 +34,7 @@ router.use((req, res, next) => {
   });
 
 
-  
-// Ruta para el webhook de Mercado Pago
+ // Ruta para el webhook de Mercado Pago
 router.post("/webhook", (req, res) => {
     try {
         // Verificar la clave secreta
@@ -47,11 +46,11 @@ router.post("/webhook", (req, res) => {
         }
 
         // Extraer datos del cuerpo de la solicitud
-        const { nombre_persona, correo_electronico, id_pago, ...otrosDatos } = req.body;
+        const { action, api_version, data, date_created, id, live_mode, type, user_id } = req.body;
 
         // Insertar datos en la base de datos
-        req.dbConnection.query('INSERT INTO mercadowebhooktable (nombre_persona, correo_electronico, id_pago, otros_datos) VALUES (?, ?, ?, ?)',
-            [nombre_persona, correo_electronico, id_pago, JSON.stringify(otrosDatos)],
+        req.dbConnection.query('INSERT INTO mercadowebhooktable (action, api_version, data, date_created, id, live_mode, type, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [action, api_version, JSON.stringify(data), new Date(date_created), id, live_mode, type, user_id],
             (error, results) => {
                 if (error) {
                     console.error('Error al insertar datos en la base de datos:', error);
@@ -73,6 +72,7 @@ router.post("/webhook", (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 
 // Ruta para crear preferencia MERCADO PAGO
@@ -109,8 +109,6 @@ router.post("/preference", async (req, res) => {
         res.status(500).send("preference" + err);
     }
 })
-
-
 
 
 
