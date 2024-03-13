@@ -37,6 +37,7 @@ router.use((req, res, next) => {
  // Ruta para el webhook de Mercado Pago
 router.post("/webhook", (req, res) => {
     try {
+        console.log("Datos recibidos:", req.body); // 
         // Verificar la clave secreta
         const secretKey = req.headers['x-api-key']; // Utiliza el encabezado correcto
 

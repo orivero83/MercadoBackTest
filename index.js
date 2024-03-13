@@ -10,11 +10,13 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 
+// Define los orígenes permitidos como un array de URLs
+const allowedOrigins = ['https://mercadobacktest.onrender.com', 'https://mercadofront.onrender.com'];
+
 // Usa cors con opciones específicas
-const frontendURL = 'https://mercadofront.onrender.com';
 app.use(
   cors({
-    origin: frontendURL,
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   })
