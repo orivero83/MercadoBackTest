@@ -35,36 +35,73 @@ router.use((req, res, next) => {
   });
 
 /////////////////////////////////////WEBHOOK//////////////////////////
+/*
+// Función para verificar la firma de la notificación
+function verifySignature(headers, body, secretKey) {
+    const signature = headers['x-signature'];
+    const hmac = crypto.createHmac('sha256', secretKey);
+    const calculatedSignature = hmac.update(body).digest('hex');
+    return signature === calculatedSignature;
+}
 
 
+
+// Ruta para el webhook de Mercado Pago
 router.post('/webhook', (req, res) => {
     // Verificar firma de la notificación
     const secretKey = 'tu_clave_secreta_de_webhook_de_mercado_pago'; // Reemplaza con tu clave secreta
-    const signature = req.headers['x-signature'];
-    const body = JSON.stringify(req.body);
-  
-    const hmac = crypto.createHmac('sha256', secretKey);
-    const calculatedSignature = hmac.update(body).digest('hex');
-  
-    if (signature !== calculatedSignature) {
-      console.error('Firma inválida. La notificación podría no ser válida.');
-      return res.status(401).send('Unauthorized');
+
+    if (!verifySignature(req.headers, JSON.stringify(req.body), secretKey)) {
+        console.error('Firma inválida. La notificación podría no ser válida.');
+        return res.status(401).send('Unauthorized');
     }
-  
+
     // Procesar la notificación y extraer los datos relevantes
     const paymentData = req.body;
     const payerName = paymentData.payer.name;
     const payerEmail = paymentData.payer.email;
-  
+
     // Haz lo que necesites con los datos del pagador
     console.log('Nombre del pagador:', payerName);
     console.log('Correo electrónico del pagador:', payerEmail);
-  
+
     // Devolver una respuesta exitosa
     res.status(200).send('OK');
-  });
+});
 
-  
+*/
+
+
+//////////////WEBHOOK VIDEO////////////////////
+
+router.post('/webhook', async function (req, res){
+    const payment = req.query;
+    console.log({ payment });
+
+    const paymentId = req.query.id;
+
+    try {
+        const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${client.accessToken}`
+            }
+        });
+
+        if(response.ok){
+            const data = await response.json();
+            console.log(data);
+        }
+
+        res.sendStatus(200);
+
+    } catch (error) {
+        console.error('Error', error);
+        res.sendStatus(500);
+    }
+})
+
+
 
 // Ruta para crear preferencia MERCADO PAGO
 router.post("/preference", async (req, res) => {
@@ -87,6 +124,7 @@ router.post("/preference", async (req, res) => {
                 pending: 'http://www.danirivero.com',
             },
             auto_return: 'approved',
+            notification_url: 'https://mercadobacktest.onrender.com/webhook'
         };
 
         const preference = new Preference(client);
