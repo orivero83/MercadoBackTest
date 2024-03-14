@@ -34,20 +34,21 @@ router.use((req, res, next) => {
   });
 
 
- // Ruta para el webhook de Mercado Pago
+// Ruta para el webhook de Mercado Pago
 router.post("/webhook", (req, res) => {
     try {
         console.log("Datos recibidos:", req.body); // 
-        // Verificar la clave secreta
-        const secretKey = req.headers['x-api-key']; // Utiliza el encabezado correcto
-
-        if (secretKey !== process.env.MP_WEBHOOK_SECRET) {
-            console.error('Clave secreta incorrecta. La notificación podría no ser válida.');
-            return res.status(401).send('Unauthorized');
-        }
-
         // Extraer datos del cuerpo de la solicitud
         const { action, api_version, data, date_created, id, live_mode, type, user_id } = req.body;
+
+        // Verificar el identificador único asociado con la transacción
+        const transactionId = data.id; // Obtener el identificador único asociado con la transacción desde el cuerpo de la solicitud
+        const expectedTransactionId = process.env.EXPECTED_TRANSACTION_ID; // Obtener el identificador único esperado desde las variables de entorno
+
+        if (transactionId !== expectedTransactionId) {
+            console.error('Identificador de transacción incorrecto. La notificación podría no ser válida.');
+            return res.status(401).send('Unauthorized');
+        }
 
         // Insertar datos en la base de datos
         req.dbConnection.query('INSERT INTO mercadowebhooktable (action, api_version, data, date_created, id, live_mode, type, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
