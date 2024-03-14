@@ -33,48 +33,36 @@ router.use((req, res, next) => {
     });
   });
 
-
-// Ruta para el webhook de Mercado Pago
-router.post("/webhook", (req, res) => {
+/////////////////////////////////////WEBHOOK//////////////////////////
+  router.post("/webhook", (req, res) => {
     try {
-        console.log("Datos recibidos:", req.body); // 
-        // Extraer datos del cuerpo de la solicitud
-        const { action, api_version, data, date_created, id, live_mode, type, user_id } = req.body;
+        console.log("Datos recibidos:", req.body);
+        const signatureHeader = req.headers['x-signature'];
+        const [timestamp, signature] = signatureHeader.split(',');
+        
+        const signatureTemplate = `id:${req.body.data.id};ts:${timestamp};`;
+        
+        const secretKey = process.env.MP_WEBHOOK_SECRET; // Obtener la clave secreta de Mercado Pago desde las variables de entorno
+        
+        const generatedSignature = crypto.createHmac('sha256', secretKey)
+            .update(signatureTemplate)
+            .digest('hex');
 
-        // Verificar el identificador único asociado con la transacción
-        const transactionId = data.id; // Obtener el identificador único asociado con la transacción desde el cuerpo de la solicitud
-        const expectedTransactionId = process.env.EXPECTED_TRANSACTION_ID; // Obtener el identificador único esperado desde las variables de entorno
-
-        if (transactionId !== expectedTransactionId) {
-            console.error('Identificador de transacción incorrecto. La notificación podría no ser válida.');
+        if (generatedSignature !== signature) {
+            console.error('Firma inválida. La notificación podría no ser válida.');
             return res.status(401).send('Unauthorized');
         }
 
-        // Insertar datos en la base de datos
-        req.dbConnection.query('INSERT INTO mercadowebhooktable (action, api_version, data, date_created, id, live_mode, type, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [action, api_version, JSON.stringify(data), new Date(date_created), id, live_mode, type, user_id],
-            (error, results) => {
-                if (error) {
-                    console.error('Error al insertar datos en la base de datos:', error);
-                    res.status(500).send('Internal Server Error');
-                } else {
-                    // Verificar si la inserción fue exitosa y enviar respuesta
-                    if (results && results.insertId !== undefined) {
-                        console.log('Datos insertados correctamente en la base de datos.');
-                        res.status(200).send("Notificación y datos insertados correctamente");
-                    } else {
-                        console.error('Error al procesar la solicitud');
-                        res.status(500).send('Error al procesar la solicitud');
-                    }
-                }
-            });
+        // Si la firma es válida, continuar con el procesamiento de la notificación
+        // Insertar datos en la base de datos, etc.
+
+        res.status(200).send("Notificación recibida y autenticada correctamente");
 
     } catch (error) {
         console.error('Error al procesar la notificación:', error);
         res.status(500).send('Internal Server Error');
     }
 });
-
 
 
 // Ruta para crear preferencia MERCADO PAGO
