@@ -35,7 +35,7 @@ router.use((req, res, next) => {
   });
 
 /////////////////////////////////////WEBHOOK//////////////////////////
-/*
+
 // Función para verificar la firma de la notificación
 function verifySignature(headers, body, secretKey) {
     const signature = headers['x-signature'];
@@ -49,7 +49,7 @@ function verifySignature(headers, body, secretKey) {
 // Ruta para el webhook de Mercado Pago
 router.post('/webhook', (req, res) => {
     // Verificar firma de la notificación
-    const secretKey = 'tu_clave_secreta_de_webhook_de_mercado_pago'; // Reemplaza con tu clave secreta
+    const secretKey = process.env.MP_WEBHOOK_SECRET; // Reemplaza con tu clave secreta
 
     if (!verifySignature(req.headers, JSON.stringify(req.body), secretKey)) {
         console.error('Firma inválida. La notificación podría no ser válida.');
@@ -69,9 +69,11 @@ router.post('/webhook', (req, res) => {
     res.status(200).send('OK');
 });
 
-*/
 
 
+
+
+/*
 //////////////WEBHOOK VIDEO////////////////////
 
 router.post('/webhook', async function (req, res){
@@ -101,7 +103,7 @@ router.post('/webhook', async function (req, res){
     }
 })
 
-
+*/
 
 // Ruta para crear preferencia MERCADO PAGO
 router.post("/preference", async (req, res) => {
