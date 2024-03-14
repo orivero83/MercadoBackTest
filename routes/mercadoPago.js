@@ -37,36 +37,34 @@ router.use((req, res, next) => {
 /////////////////////////////////////WEBHOOK//////////////////////////
 
 
-router.post("/webhook", (req, res) => {
-    try {
-        console.log("Datos recibidos:", req.body);
-        const signatureHeader = req.headers['x-signature'];
-        const [timestamp, signature] = signatureHeader.split(',');
-        
-        const signatureTemplate = `id:${req.body.data.id};ts:${timestamp};`;
-        
-        const secretKey = process.env.MP_WEBHOOK_SECRET; // Obtener la clave secreta de Mercado Pago desde las variables de entorno
-        
-        const generatedSignature = crypto.createHmac('sha256', secretKey)
-            .update(signatureTemplate)
-            .digest('hex');
-
-        if (generatedSignature !== signature) {
-            console.error('Firma inválida. La notificación podría no ser válida.');
-            return res.status(401).send('Unauthorized');
-        }
-
-        // Si la firma es válida, continuar con el procesamiento de la notificación
-        // Insertar datos en la base de datos, etc.
-
-        res.status(200).send("Notificación recibida y autenticada correctamente");
-
-    } catch (error) {
-        console.error('Error al procesar la notificación:', error);
-        res.status(500).send('Internal Server Error');
+router.post('/webhook', (req, res) => {
+    // Verificar firma de la notificación
+    const secretKey = 'tu_clave_secreta_de_webhook_de_mercado_pago'; // Reemplaza con tu clave secreta
+    const signature = req.headers['x-signature'];
+    const body = JSON.stringify(req.body);
+  
+    const hmac = crypto.createHmac('sha256', secretKey);
+    const calculatedSignature = hmac.update(body).digest('hex');
+  
+    if (signature !== calculatedSignature) {
+      console.error('Firma inválida. La notificación podría no ser válida.');
+      return res.status(401).send('Unauthorized');
     }
-});
+  
+    // Procesar la notificación y extraer los datos relevantes
+    const paymentData = req.body;
+    const payerName = paymentData.payer.name;
+    const payerEmail = paymentData.payer.email;
+  
+    // Haz lo que necesites con los datos del pagador
+    console.log('Nombre del pagador:', payerName);
+    console.log('Correo electrónico del pagador:', payerEmail);
+  
+    // Devolver una respuesta exitosa
+    res.status(200).send('OK');
+  });
 
+  
 
 // Ruta para crear preferencia MERCADO PAGO
 router.post("/preference", async (req, res) => {
