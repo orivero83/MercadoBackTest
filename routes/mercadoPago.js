@@ -4,6 +4,7 @@ import { MercadoPagoConfig, Preference } from 'mercadopago';
 import dotenv from 'dotenv';
 dotenv.config();
 import mysql from 'mysql2';
+import crypto from 'crypto';
 
 const router = express.Router();
 
@@ -34,7 +35,9 @@ router.use((req, res, next) => {
   });
 
 /////////////////////////////////////WEBHOOK//////////////////////////
-  router.post("/webhook", (req, res) => {
+
+
+router.post("/webhook", (req, res) => {
     try {
         console.log("Datos recibidos:", req.body);
         const signatureHeader = req.headers['x-signature'];
